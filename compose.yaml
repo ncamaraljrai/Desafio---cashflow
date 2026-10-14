@@ -1,0 +1,55 @@
+x-app: &app
+  build: .
+  env_file: .env
+  restart: unless-stopped
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  read_only: true
+  tmpfs: [/tmp]
+
+services:
+  ledger:
+    <<: *app
+    command: [python, -m, cashflow.main, ledger]
+    ports: ["127.0.0.1:8000:8000"]
+    environment:
+      LEDGER_DB: /data/ledger.db
+    volumes: [ledger-data:/data]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+  summary:
+    <<: *app
+    command: [python, -m, cashflow.main, summary]
+    ports: ["127.0.0.1:8001:8001"]
+    environment:
+      SUMMARY_DB: /data/summary.db
+    volumes: [summary-data:/data]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8001/health/ready', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+  relay:
+    <<: *app
+    command: [python, -m, cashflow.main, relay]
+    environment:
+      LEDGER_DB: /data/ledger.db
+      SUMMARY_URL: http://summary:8001
+    volumes: [ledger-data:/data]
+  assistant:
+    <<: *app
+    profiles: [ai]
+    command: [python, -m, cashflow.ai_main]
+    ports: ["127.0.0.1:8002:8002"]
+    environment:
+      KNOWLEDGE_DB: /data/knowledge.db
+      SUMMARY_URL: http://summary:8001
+    volumes: [knowledge-data:/data]
+
+volumes:
+  ledger-data:
+  summary-data:
+  knowledge-data:
