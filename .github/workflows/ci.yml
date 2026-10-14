@@ -20,7 +20,7 @@ jobs:
       - run: ruff format --check .
       - run: python -m pytest -q
       - run: PYTHONPATH=. python scripts/verify_runtime.py --seconds 30
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: runtime-verification
