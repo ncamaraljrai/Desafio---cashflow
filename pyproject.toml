@@ -3,7 +3,7 @@ name = "cashflow-clean-architecture"
 version = "1.0.0"
 requires-python = ">=3.12"
 description = "Cashflow challenge: independent ledger and daily consolidation"
-dependencies = ["fastapi==0.143.0", "uvicorn==0.54.0", "httpx==0.28.1"]
+dependencies = ["fastapi==0.162.0", "uvicorn==0.54.0", "httpx==0.28.1"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
